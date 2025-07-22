@@ -7,7 +7,34 @@ const public_users = express.Router();
 
 public_users.post("/register", (req,res) => {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const user = req.body.user;
+  const username = user.username;
+  const password = user.password
+ // if(user.password)
+  //{
+   // password = user.password;
+  //}
+  //const password = user.password;
+  if(!username || !password)
+  {
+      let errorMsg = "Error: missing ";
+      if(!username) errorMsg = errorMsg + "[User Name] ";
+      if(!password) errorMsg = errorMsg + "[Password]";
+      return res.status(300).json({message: errorMsg});
+  }
+
+  let filtered_users = users.filter((user) => user.username === username);
+  if(filtered_users.length > 0)
+  {
+    let errorMsg = "Error: user " + username + " already exists";
+    return res.status(300).json({message: errorMsg});
+  }
+
+  users.push(user);
+  let successMsg = "User " + username + " successfully registered";
+  //
+    res.send(successMsg);
+  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Get the book list available in the shop
@@ -50,7 +77,9 @@ public_users.get('/title/:title',function (req, res) {
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const isbn = parseInt(req.params.isbn);
+  res.send(books[isbn].reviews);
+  //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 module.exports.general = public_users;
