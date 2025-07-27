@@ -55,13 +55,46 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
+    //Write your code here
+    const newReview = req.body.review;
+    if(!newReview)
+    {
+        return res.status(400).json({message: "Error: no review submitted"});
+    }
+    const isbn = parseInt(req.params.isbn);
 
-  const isbn = parseInt(req.params.isbn);
-  //let allReviews = books[isbn].reviews;
-  //let filteredReviews = allReviews.filter((user) => user.username == username);
-  //res.send(books[isbn].reviews);
-   return res.status(300).json({message: req.session.authorization.data + "wants a book"});
+    let currentUser = "";
+    if (req.session.authorization) 
+    {
+            let token = req.session.authorization['accessToken']; // Access Token
+
+        jwt.verify(token, "access", (err, user) => {
+            if (!err) {
+                //req.user = user; // Set authenticated user data on the request object
+                //userName = JSON.stringify(user.data);
+                currentUser = user.data.username;
+            } else {
+                return res.status(403).json({ message: "User not authenticated" }); // Return error if token verification fails
+            }
+        });
+    }
+    let allReviews = books[isbn].reviews;
+    const title = books[isbn].title;
+    for(key in allReviews)
+    {
+        if(key == currentUser)
+        {
+            //Update current review
+            books[isbn].reviews[currentUser] = newReview;
+            return res.status(200).json({message: currentUser + " has updated the review for " + title});
+        }
+    }
+    //User has no reviews -- add it
+    books[isbn].reviews[currentUser] = newReview;
+        
+    return res.status(200).json({message: currentUser + " has added a review for " + title});
+    
+  
 });
 
 module.exports.authenticated = regd_users;
