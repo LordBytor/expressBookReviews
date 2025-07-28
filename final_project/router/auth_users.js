@@ -97,6 +97,52 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   
 });
 
+// delete book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+
+    const isbn = parseInt(req.params.isbn);
+
+    let currentUser = "";
+    if (req.session.authorization) 
+    {
+            let token = req.session.authorization['accessToken']; // Access Token
+
+        jwt.verify(token, "access", (err, user) => {
+            if (!err) {
+                //req.user = user; // Set authenticated user data on the request object
+                //userName = JSON.stringify(user.data);
+                currentUser = user.data.username;
+            } else {
+                return res.status(403).json({ message: "User not authenticated" }); // Return error if token verification fails
+            }
+        });
+    }
+
+    if(books[isbn].reviews[currentUser])
+    {
+        delete books[isbn].reviews[currentUser];
+        return res.status(200).json({message: " Deleting review from "  + currentUser});
+
+    }
+    // let allReviews = books[isbn].reviews;
+    // const title = books[isbn].title;
+    // for(key in allReviews)
+    // {
+    //     if(key == currentUser)
+    //     {
+    //         //Update current review
+    //         books[isbn].reviews[currentUser] = newReview;
+    //         return res.status(200).json({message: currentUser + " has updated the review for " + title});
+    //     }
+    // }
+    //User has no reviews -- add it
+   // books[isbn].reviews[currentUser] = newReview;
+        
+    return res.status(300).json({message: currentUser + " has no reviews to delete" });
+    
+  
+});
+
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
